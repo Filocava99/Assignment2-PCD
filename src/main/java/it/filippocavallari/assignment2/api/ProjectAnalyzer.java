@@ -39,5 +39,5 @@ public interface ProjectAnalyzer {
 	 * @param srcProjectFolderName
 	 * @param callback
 	 */
-	void analyzeProject(String srcProjectFolderName, Consumer<ProjectElem> callback);
+	void analyzeProject(String srcProjectFolderName, String topic);
 }

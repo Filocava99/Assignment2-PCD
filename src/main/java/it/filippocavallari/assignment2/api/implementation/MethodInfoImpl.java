@@ -2,10 +2,9 @@ package it.filippocavallari.assignment2.api.implementation;
 
 import it.filippocavallari.assignment2.api.*;
 
-import java.util.LinkedList;
 import java.util.List;
 
-public class MethodInfoImpl implements MethodInfo, ProjectElem {
+public class MethodInfoImpl implements MethodInfo {
 
     private final String name;
     private final int srcBeginLine;

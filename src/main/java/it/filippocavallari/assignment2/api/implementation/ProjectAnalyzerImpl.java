@@ -7,6 +7,7 @@ import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
+import io.vertx.core.eventbus.EventBus;
 import it.filippocavallari.assignment2.api.*;
 import it.filippocavallari.assignment2.visitor.ClassVisitor;
 import it.filippocavallari.assignment2.visitor.InterfaceVisitor;
@@ -24,7 +25,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
-    private final Vertx vertx = Vertx.vertx();
+    private final Vertx vertx;
+
+    public ProjectAnalyzerImpl(Vertx vertx) {
+        this.vertx = vertx;
+    }
 
     @Override
     public Future<ClassReport> getClassReport(String srcClassPath) {
@@ -68,15 +73,10 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         });
     }
 
-    @Override
-    public void analyzeProject(String srcProjectFolderName, Consumer<ProjectElem> callback) {
-//        File file = new File(srcProjectFolderName);
-//        if(file.isDirectory()){
-//            analyzeProject(srcProjectFolderName, callback);
-//        }else{
-//            ClassReportImpl classReport = new ClassReportImpl();
-//            parseFile(file.getPath(), new ClassVisitor(), classReport).onComplete(handler -> callback.accept());
-//        }
+    public void analyzeProject(String srcProjectFolderName, String topic) {
+        EventBus eventBus = vertx.eventBus();
+        vertx.deployVerticle(new MyVerticle(topic));
+        eventBus.publish("start", srcProjectFolderName);
     }
 
     private <T> Future<T> parseFile(String filePath, VoidVisitorAdapter<T> visitor, T arg) {
@@ -124,11 +124,6 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         var result = new AtomicBoolean();
         classFilterVisitor.visit(cu, result);
         return result.get();
-    }
-
-
-    public void stopVertex() {
-        vertx.close();
     }
 
 }

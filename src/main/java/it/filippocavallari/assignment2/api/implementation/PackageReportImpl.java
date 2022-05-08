@@ -2,12 +2,11 @@ package it.filippocavallari.assignment2.api.implementation;
 
 import it.filippocavallari.assignment2.api.ClassReport;
 import it.filippocavallari.assignment2.api.PackageReport;
-import it.filippocavallari.assignment2.api.ProjectElem;
 
 import java.util.LinkedList;
 import java.util.List;
 
-public class PackageReportImpl implements PackageReport, ProjectElem {
+public class PackageReportImpl implements PackageReport {
 
     private String name;
     private final List<ClassReport> classReports = new LinkedList<>();
