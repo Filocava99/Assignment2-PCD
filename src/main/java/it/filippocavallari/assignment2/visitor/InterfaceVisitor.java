@@ -4,8 +4,6 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
-import it.filippocavallari.assignment2.api.InterfaceReport;
-import it.filippocavallari.assignment2.api.implementation.ClassReportImpl;
 import it.filippocavallari.assignment2.api.implementation.InterfaceReportImpl;
 
 public class InterfaceVisitor extends VoidVisitorAdapter<InterfaceReportImpl> implements BaseVisitor{

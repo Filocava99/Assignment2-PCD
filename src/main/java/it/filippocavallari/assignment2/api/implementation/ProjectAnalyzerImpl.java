@@ -9,6 +9,7 @@ import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import it.filippocavallari.assignment2.api.*;
+import it.filippocavallari.assignment2.verticles.AnalyzerVerticle;
 import it.filippocavallari.assignment2.visitor.ClassVisitor;
 import it.filippocavallari.assignment2.visitor.InterfaceVisitor;
 import it.filippocavallari.assignment2.visitor.PackageVisitor;
@@ -22,7 +23,6 @@ import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     private final Vertx vertx;
@@ -75,7 +75,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     public void analyzeProject(String srcProjectFolderName, String topic) {
         EventBus eventBus = vertx.eventBus();
-        vertx.deployVerticle(new MyVerticle(topic));
+        vertx.deployVerticle(new AnalyzerVerticle(topic));
         eventBus.publish("start", srcProjectFolderName);
     }
 

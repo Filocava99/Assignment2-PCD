@@ -11,6 +11,7 @@ public class ClassVisitor extends VoidVisitorAdapter<ClassReportImpl> implements
 
     @Override
     public void visit(LocalClassDeclarationStmt n, ClassReportImpl arg) {
+        //DO NOT WANT TO VISIT LOCAL CLASSES CAUSE STUFF GETS MESSY
     }
 
     @Override

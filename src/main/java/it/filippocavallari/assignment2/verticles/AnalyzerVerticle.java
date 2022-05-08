@@ -1,30 +1,24 @@
-package it.filippocavallari.assignment2.api.implementation;
+package it.filippocavallari.assignment2.verticles;
 
 import com.github.javaparser.StaticJavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
-import com.github.javaparser.ast.body.FieldDeclaration;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import it.filippocavallari.assignment2.visitor.AdvancedVisitor;
-import it.filippocavallari.assignment2.visitor.ClassVisitor;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.List;
-import java.util.Stack;
 
-public class MyVerticle extends AbstractVerticle {
+public class AnalyzerVerticle extends AbstractVerticle {
     private final EventBus eventBus;
     private final String address;
     private final AdvancedVisitor visitor = new AdvancedVisitor();
 
-    public MyVerticle(String address) {
+    public AnalyzerVerticle(String address) {
         this.address = address;
         this.eventBus = vertx.eventBus();
     }

@@ -5,6 +5,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.FieldDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
+import io.vertx.core.Vertx;
 import it.filippocavallari.assignment2.api.implementation.ProjectAnalyzerImpl;
 
 import java.util.List;
@@ -42,12 +43,13 @@ class FullCollector extends VoidVisitorAdapter<Void> {
 
 public class TestJavaParser {
 
-	public static void main(String[] args) throws Exception {;
-		var projectAnalizer = new ProjectAnalyzerImpl();
+	public static void main(String[] args) throws Exception {
+		Vertx vertx = Vertx.vertx();
+		var projectAnalizer = new ProjectAnalyzerImpl(vertx);
 		projectAnalizer.getProjectReport("src/").onComplete(result -> {
 			result.result().getAllClasses().forEach(it -> System.out.println(it.getFullClassName()));
 			System.out.println("Main class: " + result.result().getMainClass().getFullClassName());
-			projectAnalizer.stopVertex();
 		});
+		vertx.close();
 	}
 }
