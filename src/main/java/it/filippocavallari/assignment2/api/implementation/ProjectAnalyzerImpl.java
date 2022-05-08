@@ -8,6 +8,7 @@ import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.JsonObject;
 import it.filippocavallari.assignment2.api.*;
 import it.filippocavallari.assignment2.verticles.AnalyzerVerticle;
 import it.filippocavallari.assignment2.visitor.ClassVisitor;
@@ -75,8 +76,9 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     public void analyzeProject(String srcProjectFolderName, String topic) {
         EventBus eventBus = vertx.eventBus();
-        vertx.deployVerticle(new AnalyzerVerticle(topic));
-        eventBus.publish("start", srcProjectFolderName);
+        vertx.deployVerticle(new AnalyzerVerticle(topic, vertx)).onComplete(future -> {
+            eventBus.publish(topic, new JsonObject().put("message", "start").put("path", srcProjectFolderName));
+        });
     }
 
     private <T> Future<T> parseFile(String filePath, VoidVisitorAdapter<T> visitor, T arg) {
@@ -120,7 +122,6 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
                 arg.set(!n.isInterface());
             }
         };
-
         var result = new AtomicBoolean();
         classFilterVisitor.visit(cu, result);
         return result.get();
