@@ -5,6 +5,6 @@ public interface MethodInfo {
 	String getName();
 	int getSrcBeginLine();
 	int getSrcEndLine();
-	ClassReport getParent();
+	InterfaceReport getParent();
 		
 }

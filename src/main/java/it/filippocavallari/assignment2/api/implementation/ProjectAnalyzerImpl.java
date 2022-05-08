@@ -1,21 +1,26 @@
 package it.filippocavallari.assignment2.api.implementation;
 
 import com.github.javaparser.StaticJavaParser;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import it.filippocavallari.assignment2.api.*;
 import it.filippocavallari.assignment2.visitor.ClassVisitor;
+import it.filippocavallari.assignment2.visitor.InterfaceVisitor;
 import it.filippocavallari.assignment2.visitor.PackageVisitor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class ProjectAnalyzerImpl implements ProjectAnalyzer {
@@ -43,15 +48,19 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     @Override
     public Future<ProjectReport> getProjectReport(String srcProjectFolderPath) {
         return vertx.executeBlocking(future -> {
-            List<Future<ClassReport>> futures = parseProject(srcProjectFolderPath);
+            List<Future<InterfaceReport>> futures = parseProject(srcProjectFolderPath);
             var report = new ProjectReportImpl();
             CompositeFuture.all(new ArrayList<>(futures)).onComplete(handler -> {
                 System.out.println(handler.succeeded());
-                handler.result().list().stream().map(result -> (ClassReport) result).forEach(classReport -> {
+                handler.result().list().stream().map(result -> (InterfaceReport) result).forEach(classReport -> {
                     System.out.println(classReport.getFullClassName());
-                    report.getAllClasses().add(classReport);
-                    if (classReport.getMethodsInfo().stream().anyMatch(methodInfo -> methodInfo.getName().equalsIgnoreCase("main"))) {
-                        report.setMainClass(classReport);
+                    if(classReport instanceof ClassReport) {
+                        report.getAllClasses().add((ClassReport)classReport);
+                        if (classReport.getMethodsInfo().stream().anyMatch(methodInfo -> methodInfo.getName().equalsIgnoreCase("main"))) {
+                            report.setMainClass((ClassReport)classReport);
+                        }
+                    }else{
+                        report.getAllInterfaces().add(classReport);
                     }
                 });
                 future.complete(report);
@@ -61,7 +70,13 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
 
     @Override
     public void analyzeProject(String srcProjectFolderName, Consumer<ProjectElem> callback) {
-
+//        File file = new File(srcProjectFolderName);
+//        if(file.isDirectory()){
+//            analyzeProject(srcProjectFolderName, callback);
+//        }else{
+//            ClassReportImpl classReport = new ClassReportImpl();
+//            parseFile(file.getPath(), new ClassVisitor(), classReport).onComplete(handler -> callback.accept());
+//        }
     }
 
     private <T> Future<T> parseFile(String filePath, VoidVisitorAdapter<T> visitor, T arg) {
@@ -76,17 +91,41 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         });
     }
 
-    private List<Future<ClassReport>> parseProject(String subDir) {
-        List<Future<ClassReport>> classReports = new LinkedList<>();
+    private List<Future<InterfaceReport>> parseProject(String subDir) {
+        List<Future<InterfaceReport>> interfaceReports = new LinkedList<>();
         Arrays.stream(new File(subDir).listFiles()).forEach(file -> {
             if (file.isDirectory()) {
-                classReports.addAll(parseProject(file.getPath()));
+                interfaceReports.addAll(parseProject(file.getPath()));
             } else {
-                classReports.add(parseFile(file.getPath(), new ClassVisitor(), new ClassReportImpl()).map(it -> it));
+                boolean flag = false;
+                try {
+                    flag = isClass(StaticJavaParser.parse(file));
+                } catch (FileNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                if(flag){
+                    interfaceReports.add(parseFile(file.getPath(), new ClassVisitor(), new ClassReportImpl()).map(it -> it));
+                }else{
+                    interfaceReports.add(parseFile(file.getPath(), new InterfaceVisitor(), new InterfaceReportImpl()).map(it -> it));
+                }
             }
         });
-        return classReports;
+        return interfaceReports;
     }
+
+    private boolean isClass(CompilationUnit cu){
+        var classFilterVisitor = new VoidVisitorAdapter<AtomicBoolean>() {
+            @Override
+            public void visit(ClassOrInterfaceDeclaration n, AtomicBoolean arg) {
+                arg.set(!n.isInterface());
+            }
+        };
+
+        var result = new AtomicBoolean();
+        classFilterVisitor.visit(cu, result);
+        return result.get();
+    }
+
 
     public void stopVertex() {
         vertx.close();

@@ -2,14 +2,7 @@ package it.filippocavallari.assignment2.api;
 
 import java.util.List;
 
-public interface ClassReport {
-
-	String getFullClassName();
-	
-	String getSrcFullFileName();
-
-	List<MethodInfo> getMethodsInfo();
-
+public interface ClassReport extends InterfaceReport {
 	List<FieldInfo> getFieldsInfo();
 	
 }

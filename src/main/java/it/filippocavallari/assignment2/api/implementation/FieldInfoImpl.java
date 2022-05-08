@@ -2,8 +2,9 @@ package it.filippocavallari.assignment2.api.implementation;
 
 import it.filippocavallari.assignment2.api.ClassReport;
 import it.filippocavallari.assignment2.api.FieldInfo;
+import it.filippocavallari.assignment2.api.ProjectElem;
 
-public class FieldInfoImpl implements FieldInfo {
+public class FieldInfoImpl implements FieldInfo, ProjectElem {
 
     private final String name;
     private final String typeName;
