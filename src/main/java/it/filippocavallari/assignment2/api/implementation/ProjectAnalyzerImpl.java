@@ -82,9 +82,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
         return vertx.fileSystem().readFile(filePath).compose(result -> {
             String content = new String(result.getBytes());
             return vertx.executeBlocking(future -> {
-                System.out.println(filePath + ": ");
                 visitor.visit(StaticJavaParser.parse(content), arg);
-                System.out.println("completed");
                 future.complete(arg);
             });
         });

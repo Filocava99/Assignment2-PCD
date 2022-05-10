@@ -15,7 +15,6 @@ public class InterfaceVisitor extends VoidVisitorAdapter<InterfaceReportImpl> im
     @Override
     public void visit(ClassOrInterfaceDeclaration n, InterfaceReportImpl arg) {
         arg.setName(n.getNameAsString());
-        System.out.println(n.getNameAsString());
         n.getFields().forEach(it -> visit(it, arg));
         n.getMethods().forEach(it -> visit(it, arg));
     }

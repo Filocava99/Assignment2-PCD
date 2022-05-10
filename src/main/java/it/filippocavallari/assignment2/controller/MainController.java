@@ -24,8 +24,12 @@ public class MainController {
     }
     private static void setUpView(){
         GUI gui = new GUI();
-        gui.getNextButton().addActionListener((event) -> {
+        gui.getStartButton().addActionListener((event) -> {
             projectAnalizer.analyzeProject("src/", address);
+        });
+
+        gui.getStopButton().addActionListener((event) -> {
+            vertx.eventBus().publish(address, new JsonObject().put("message", "stop"));
         });
 
         vertx.eventBus().consumer(address, handler -> {

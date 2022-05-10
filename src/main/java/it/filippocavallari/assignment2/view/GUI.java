@@ -7,13 +7,13 @@ public class GUI extends JFrame {
 
     private final TextArea textArea = new TextArea();
 
-    private final JButton nextButton = new JButton("Next");
+    private final JButton startButton = new JButton("Start");
     private final JButton stopButton = new JButton("Stop");
     public GUI(){
         JPanel gridLayout = new JPanel();
         gridLayout.setLayout(new GridLayout(2,1));
         JPanel innerGridLayout = new JPanel(new GridLayout(1,2));
-        innerGridLayout.add("Next", nextButton);
+        innerGridLayout.add("Next", startButton);
         innerGridLayout.add("Stop", stopButton);
         gridLayout.add("TextArea", textArea);
         gridLayout.add("innerGrid", innerGridLayout);
@@ -27,8 +27,8 @@ public class GUI extends JFrame {
         return textArea;
     }
 
-    public JButton getNextButton() {
-        return nextButton;
+    public JButton getStartButton() {
+        return startButton;
     }
 
     public JButton getStopButton() {

@@ -6,7 +6,6 @@ import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
 import it.filippocavallari.assignment2.api.ProjectAnalyzer;
-import it.filippocavallari.assignment2.visitor.AdvancedVisitor;
 
 import java.io.File;
 import java.util.Arrays;
@@ -16,7 +15,6 @@ public class AnalyzerVerticle extends AbstractVerticle {
     private final Vertx vertx;
     private final EventBus eventBus;
     private final String address;
-    private final AdvancedVisitor visitor = new AdvancedVisitor();
     private final  ProjectAnalyzer projectAnalyzer;
 
     public AnalyzerVerticle(String address, Vertx vertx, ProjectAnalyzer projectAnalyzer) {
@@ -41,6 +39,7 @@ public class AnalyzerVerticle extends AbstractVerticle {
                 }
                 case "stop": {
                     System.out.println("STOP");
+                    vertx.deploymentIDs().forEach(vertx::undeploy);
                 }
             }
         });
@@ -49,7 +48,6 @@ public class AnalyzerVerticle extends AbstractVerticle {
     @Override
     public void stop() throws Exception {
         super.stop();
-        vertx.deploymentIDs().forEach(vertx::undeploy);
     }
 
     private void parsePath(String path){
