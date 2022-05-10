@@ -30,6 +30,7 @@ public class MainController {
 
         gui.getStopButton().addActionListener((event) -> {
             vertx.eventBus().publish(address, new JsonObject().put("message", "stop"));
+            vertx.close();
         });
 
         vertx.eventBus().consumer(address, handler -> {
