@@ -1,5 +1,8 @@
 package it.filippocavallari.assignment2.api.implementation;
 
+import io.vertx.core.json.Json;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import it.filippocavallari.assignment2.api.*;
 
 import java.util.List;
@@ -42,5 +45,12 @@ public class MethodInfoImpl implements MethodInfo {
 
     public List<String> getModifiers() {
         return modifiers;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        JsonArray modifiersArray = new JsonArray();
+        modifiers.forEach(modifiersArray::add);
+        return new JsonObject().put("type", "method").put("name", name).put("srcBeginLine", srcBeginLine).put("srcEndLine", srcEndLine).put("parent", parent.getFullClassName()).put("modifiers", modifiersArray);
     }
 }

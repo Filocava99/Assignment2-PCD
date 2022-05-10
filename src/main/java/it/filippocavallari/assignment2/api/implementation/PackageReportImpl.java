@@ -1,5 +1,7 @@
 package it.filippocavallari.assignment2.api.implementation;
 
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import it.filippocavallari.assignment2.api.ClassReport;
 import it.filippocavallari.assignment2.api.PackageReport;
 
@@ -23,5 +25,12 @@ public class PackageReportImpl implements PackageReport {
     @Override
     public List<ClassReport> getClassReports() {
         return classReports;
+    }
+
+    @Override
+    public JsonObject toJson() {
+        JsonArray classesNames = new JsonArray();
+        classReports.stream().map(ClassReport::getFullClassName).forEach(classesNames::add);
+        return new JsonObject().put("type", "package").put("name", name).put("classes", classesNames);
     }
 }

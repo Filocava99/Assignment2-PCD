@@ -75,10 +75,7 @@ public class ProjectAnalyzerImpl implements ProjectAnalyzer {
     }
 
     public void analyzeProject(String srcProjectFolderName, String topic) {
-        EventBus eventBus = vertx.eventBus();
-        vertx.deployVerticle(new AnalyzerVerticle(topic, vertx)).onComplete(future -> {
-            eventBus.publish(topic, new JsonObject().put("message", "start").put("path", srcProjectFolderName));
-        });
+        vertx.eventBus().publish(topic, new JsonObject().put("message", "start").put("path", srcProjectFolderName));
     }
 
     private <T> Future<T> parseFile(String filePath, VoidVisitorAdapter<T> visitor, T arg) {

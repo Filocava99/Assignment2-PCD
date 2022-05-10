@@ -1,5 +1,7 @@
 package it.filippocavallari.assignment2.api;
 
+import io.vertx.core.json.JsonObject;
+
 import java.util.List;
 
 public interface InterfaceReport {
@@ -9,5 +11,7 @@ public interface InterfaceReport {
     String getSrcFullFileName();
 
     List<MethodInfo> getMethodsInfo();
+
+    JsonObject toJson();
 
 }

@@ -1,79 +1,68 @@
 package it.filippocavallari.assignment2.verticles;
 
-import com.github.javaparser.StaticJavaParser;
-import com.github.javaparser.ast.CompilationUnit;
-import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.PackageDeclaration;
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Promise;
+import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import it.filippocavallari.assignment2.api.ProjectAnalyzer;
 import it.filippocavallari.assignment2.visitor.AdvancedVisitor;
 
-import java.util.ArrayDeque;
-import java.util.Deque;
+import java.io.File;
+import java.util.Arrays;
+
 
 public class AnalyzerVerticle extends AbstractVerticle {
+    private final Vertx vertx;
     private final EventBus eventBus;
     private final String address;
     private final AdvancedVisitor visitor = new AdvancedVisitor();
+    private final  ProjectAnalyzer projectAnalyzer;
 
-    public AnalyzerVerticle(String address, Vertx vertx) {
+    public AnalyzerVerticle(String address, Vertx vertx, ProjectAnalyzer projectAnalyzer) {
         this.address = address;
+        this.vertx = vertx;
         this.eventBus = vertx.eventBus();
+        this.projectAnalyzer = projectAnalyzer;
     }
-
-    private Deque<Node> deque = new ArrayDeque<>();
+    private Future future;
 
     @Override
-    public void start(Promise<Void> startPromise) throws Exception {
+    public void start() {
         eventBus.consumer(address, handler -> {
             JsonObject jsonObject = (JsonObject) handler.body();
             switch (jsonObject.getString("message")){
                 case "start": {
                     System.out.println("START");
-                    vertx.fileSystem().readFile(jsonObject.getString("path")).compose(mapper -> getVertx().executeBlocking(future -> {
-                        CompilationUnit compilationUnit = StaticJavaParser.parse(new String(mapper.getBytes()));
-                        addElementToBeParsed(compilationUnit);
-                        eventBus.send(address, new JsonObject().put("message", "started"));
-                    }));
+                    future = vertx.executeBlocking(future -> {
+                        parsePath(jsonObject.getString("path"));
+                    });
                     break;
                 }
-                case "next": {
-                    System.out.println("NEXT");
-                    System.out.println(deque.size());
-                    if(!deque.isEmpty()){
-                        vertx.executeBlocking(future -> {
-                            System.out.println("Inside next future");
-                            JsonObject result = new JsonObject();
-                            visitor.visit(deque.pop(), result);
-                            result.put("message", "visit");
-                            future.complete(result);
-                        }).onComplete(finalHandler -> {
-                            JsonObject result =  (JsonObject) finalHandler.result();
-                            eventBus.send(address, result);
-                        });
-                    }
+                case "stop": {
+                    System.out.println("STOP");
                 }
             }
         });
-        super.start(startPromise);
-        startPromise.complete();
     }
 
     @Override
     public void stop() throws Exception {
         super.stop();
+        vertx.deploymentIDs().forEach(vertx::undeploy);
     }
 
-    private void addElementToBeParsed(Node node){
-        node.getChildNodes().forEach(it -> {
-            if(it instanceof PackageDeclaration || it instanceof ClassOrInterfaceDeclaration){
-                deque.add(it);
-                addElementToBeParsed(it);
-            }
-        });
+    private void parsePath(String path){
+        File file = new File(path);
+        if(file.isFile()){
+            projectAnalyzer.getClassReport(path).onComplete(handler -> {
+               eventBus.publish(address, handler.result().toJson().put("message", "visit"));
+            });
+        }else{
+            projectAnalyzer.getPackageReport(path).onComplete(handler -> {
+                eventBus.publish(address, handler.result().toJson().put("message", "visit"));
+            });
+            Arrays.stream(file.listFiles()).map(File::getPath).forEach(this::parsePath);
+        }
     }
 }
