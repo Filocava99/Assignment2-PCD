@@ -25,13 +25,17 @@ public class MainController {
     private static void setUpView(){
         GUI gui = new GUI();
         gui.getStartButton().addActionListener((event) -> {
-            projectAnalizer.analyzeProject("src/", address);
+            var returnVal = gui.getFileChooser().showOpenDialog(gui.getStartButton());
+            if (returnVal == JFileChooser.APPROVE_OPTION) {
+                projectAnalizer.analyzeProject(gui.getFileChooser().getSelectedFile().getPath(), address);
+            }
         });
 
         gui.getStopButton().addActionListener((event) -> {
             vertx.eventBus().publish(address, new JsonObject().put("message", "stop"));
             vertx.close();
         });
+
 
         vertx.eventBus().consumer(address, handler -> {
             JsonObject response = (JsonObject)handler.body();

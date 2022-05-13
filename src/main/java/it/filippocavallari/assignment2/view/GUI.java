@@ -9,7 +9,9 @@ public class GUI extends JFrame {
 
     private final JButton startButton = new JButton("Start");
     private final JButton stopButton = new JButton("Stop");
+    private final JFileChooser fileChooser = new JFileChooser();
     public GUI(){
+        fileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
         JPanel gridLayout = new JPanel();
         gridLayout.setLayout(new GridLayout(2,1));
         JPanel innerGridLayout = new JPanel(new GridLayout(1,2));
@@ -18,7 +20,7 @@ public class GUI extends JFrame {
         gridLayout.add("TextArea", textArea);
         gridLayout.add("innerGrid", innerGridLayout);
         this.add(gridLayout);
-        this.setSize(500, 500);
+        this.setSize(1200, 800);
         this.setDefaultCloseOperation(EXIT_ON_CLOSE);
         this.setVisible(true);
     }
@@ -33,5 +35,9 @@ public class GUI extends JFrame {
 
     public JButton getStopButton() {
         return stopButton;
+    }
+
+    public JFileChooser getFileChooser() {
+        return fileChooser;
     }
 }
